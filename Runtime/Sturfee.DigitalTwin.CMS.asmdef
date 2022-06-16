@@ -1,0 +1,27 @@
+{
+    "name": "Sturfee.DigitalTwin.CMS",
+    "rootNamespace": "Sturfee.DigitalTwin.CMS",
+    "references": [
+        "GUID:9d7b7750cea11a64480144ebd384b2f6",
+        "GUID:7cf5bec77405b5c4cbf4b2c6bc166b20",
+        "GUID:3c92269389b449f41a89c80de0b0b31b",
+        "GUID:f50b621c179b609419b395845029c660",
+        "GUID:34326c4360e2d4760b399f1589bcd4dc",
+        "GUID:1a2810f97d211ef40ac4e52ad9eaaa2d",
+        "GUID:18d18f811ba286c49814567a3cfba688",
+        "GUID:ce2dd9c2eb59d8549ad1126830256b21",
+        "GUID:f3342bdf77841184fa43ed46b62683ee",
+        "GUID:fdf6252c6937c954aa47ccec00ccb252"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [
+        "Newtonsoft.Json.dll"
+    ],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
