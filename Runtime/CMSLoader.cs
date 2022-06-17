@@ -1,6 +1,7 @@
 using Newtonsoft.Json;
 using Sturfee.XRCS;
 using Sturfee.XRCS.Config;
+using SturfeeVPS.Core;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -131,9 +132,9 @@ namespace Sturfee.DigitalTwin.CMS
                 MyLogger.Log($"CMSLoader :: Trying to load Asset with ID={asset.Id}");
                 //var dataFilePath = $"{Application.persistentDataPath}/{XrConstants.LOCAL_ASSETS_PATH}/{assetId}/asset";
                 //var dataFilePath = $"{Application.persistentDataPath}/{XrConstants.LOCAL_PROJECTS_PATH}/{currentProject.Id}/Assets/{asset.Id}/asset";
-                var dataFilePath = $"{Application.persistentDataPath}/{DtConstants.LOCAL_SPACES_PATH}/{space.Id}/Assets/{asset.Id}/asset";
+                var dataFilePath = $"{Application.persistentDataPath}/{DtConstants.LOCAL_SPACES_PATH}/{space.Id}/Assets/{asset.Id}";
 
-                if (!File.Exists(dataFilePath) && (asset.Type == XrAssetDataType.Zip || asset.Type == XrAssetDataType.AssetBundle))
+                if (!Directory.Exists(dataFilePath) && (asset.Type == XrAssetDataType.Zip || asset.Type == XrAssetDataType.AssetBundle))
                 {
                     MyLogger.Log($"CMSLoader ::   Downloading Asset with ID={asset.Id} ...");
                     // download the asset first                    
@@ -174,18 +175,14 @@ namespace Sturfee.DigitalTwin.CMS
                         {
                             // ignore if no mesh file exists
                             // TODO: remove unused asset from project
-                            Debug.LogWarning($"ProjectLoader ::      No mesh found for Asset with ID={asset.Id}");
+                            Debug.LogWarning($"CMSLoader ::      No mesh found for Asset with ID={asset.Id}");
                             prefabCount++;
                             continue;
                         }
 
                         // mesh
                         var meshType = Path.GetExtension(meshFiles[0]).Replace(".", "");
-                        MyLogger.Log($"ProjectLoader ::   Trying to load MESH with type={meshType.ToUpper()} => {meshFiles[0]}");
-
-                        //StartCoroutine(LoadMesh(meshFiles[0], meshType, asset));
-
-
+                        MyLogger.Log($"CMSLoader ::   Trying to load MESH with type={meshType.ToUpper()} => {meshFiles[0]}");
                         await LoadMeshAsync(meshFiles[0], meshType, asset);
 
                     }
@@ -205,8 +202,15 @@ namespace Sturfee.DigitalTwin.CMS
 
                         var bundleFilePath = bundles[0];
                         MyLogger.Log($"  Trying to load ASSET BUNDLE from {bundleFilePath}");
-                        StartCoroutine(LoadBundledAsset(bundleFilePath, asset));
-
+                        try
+                        {
+                            await LoadBundledAsset(bundleFilePath, asset);
+                        }
+                        catch (Exception ex)
+                        {
+                            MyLogger.LogError($"ERROR :: Could not load asset bundle from {bundleFilePath}");
+                            throw ex;
+                        }
                     }
 
                     if (asset.Type == XrAssetDataType.AssetTemplate)
@@ -341,6 +345,7 @@ namespace Sturfee.DigitalTwin.CMS
 
                         prefabCount++;
                     }
+                    
                     validProjectAssetIds.Add(asset.Id);
                 }
                 catch (Exception ex)
@@ -367,7 +372,7 @@ namespace Sturfee.DigitalTwin.CMS
         {
             MyLogger.Log($"CMSLoader :: Loading Scene: {JsonConvert.SerializeObject(xrScene)}");
 
-
+            foreach (var pre in FindObjectsOfType<XrAssetPrefab>(true))  Debug.Log("Pre name : " + pre.name);
             var prefabs = FindObjectsOfType<XrAssetPrefab>(true)
                 .ToList()
                 .Distinct()
@@ -486,7 +491,7 @@ namespace Sturfee.DigitalTwin.CMS
             //OnXrSceneLoadProgress?.Invoke(1, 0);
         }
 
-        private IEnumerator LoadBundledAsset(string bundleFilePath, XrProjectAssetData xrAssetData)
+        private async Task LoadBundledAsset(string bundleFilePath, XrProjectAssetData xrAssetData)
         {
             // try to get the file for the current platform
             string filePrepend = null;
@@ -503,7 +508,7 @@ namespace Sturfee.DigitalTwin.CMS
             {
                 Debug.LogError($"Bundle has invalid naming scheme: {bundleFilePath}");
                 MyLogger.LogError($"Error Loading Asset ({xrAssetData.Name})");
-                yield break;
+                return;
             }
 
             var myPlatformFile = AssetBundlePlatformHelper.GetBundleFileForCurrentPlatform(filePrepend);
@@ -512,18 +517,19 @@ namespace Sturfee.DigitalTwin.CMS
             {
                 Debug.LogError($"Bundle does not exist: {bundleFilePath}");
                 MyLogger.LogError($"Error Loading Asset ({xrAssetData.Name})");
-                yield break;
+                return;
             }
 
             var url = "file:///" + myPlatformFile;
             var request = UnityEngine.Networking.UnityWebRequestAssetBundle.GetAssetBundle(url, 0);
-            yield return request.SendWebRequest();
+            await request.SendWebRequest();
 
             AssetBundle bundle;
             try
             {
                 MyLogger.Log($"Getting Asset Bundle Content...");
                 bundle = UnityEngine.Networking.DownloadHandlerAssetBundle.GetContent(request);
+                //bundle = AssetBundle.LoadFromFile(bundleFilePath);
             }
             catch (Exception e)
             {
@@ -538,18 +544,17 @@ namespace Sturfee.DigitalTwin.CMS
             {
                 Debug.LogError($"ERROR :: Could not load Unity Asset Bundle");
                 MyLogger.LogError($"Error Loading Asset ({xrAssetData.Name})");
-                yield break;
+                return;
             }
 
             AssetBundleLoader.CurrentInstance.AddLoadedBundle(bundle);
 
             MyLogger.Log($"  Trying to load ASSET from BUNDLE with prefabUrl={xrAssetData.DataUrl}");
-            var instance = bundle.LoadAsset<GameObject>(xrAssetData.DataUrl);
-
+            var instance = Instantiate(bundle.LoadAsset<GameObject>(xrAssetData.DataUrl));
             if (instance == null)
             {
-                Debug.LogError($"ERROR :: Could not load asset {xrAssetData.Name} from Unity Asset Bundle");
-                yield break;
+                MyLogger.LogError($"ERROR :: Could not load asset {xrAssetData.Name} from Unity Asset Bundle");
+                return;
             }
 
             var rtData = instance.AddComponent<RuntimeAssetBundleData>();
