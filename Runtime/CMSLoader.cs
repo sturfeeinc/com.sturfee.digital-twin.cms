@@ -372,7 +372,6 @@ namespace Sturfee.DigitalTwin.CMS
         {
             MyLogger.Log($"CMSLoader :: Loading Scene: {JsonConvert.SerializeObject(xrScene)}");
 
-            foreach (var pre in FindObjectsOfType<XrAssetPrefab>(true))  Debug.Log("Pre name : " + pre.name);
             var prefabs = FindObjectsOfType<XrAssetPrefab>(true)
                 .ToList()
                 .Distinct()

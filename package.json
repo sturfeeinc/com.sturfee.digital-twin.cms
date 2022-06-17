@@ -16,5 +16,8 @@
     "url": "https://sturfee.com"
   },
   "type": "library",
-  "description": "CMS SDK to load contents for Digital Twin Spaces"
+  "description": "CMS SDK to load contents for Digital Twin Spaces",
+  "dependencies": {
+    "com.sturfee.digital-twin": "1.0.0"
+  }
 }
