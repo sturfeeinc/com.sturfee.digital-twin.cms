@@ -2,6 +2,7 @@ using Newtonsoft.Json;
 using Sturfee.XRCS;
 using Sturfee.XRCS.Config;
 using SturfeeVPS.Core;
+using SturfeeVPS.SDK;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -406,6 +407,10 @@ namespace Sturfee.DigitalTwin.CMS
 
                     // set up asset data
                     var newXrAsset = Instantiate(prefab);
+                    
+                    // FOR DEBUG
+                    // Debug.Log(newXrAsset.transform.name + " SCENE ASSET LOADER ");
+
                     newXrAsset.SetActive(true);
 
                     LayerUtils.SetLayerRecursive(newXrAsset, LayerMask.NameToLayer($"{XrLayers.XrAssets}"));
@@ -624,6 +629,9 @@ namespace Sturfee.DigitalTwin.CMS
 
             LayerUtils.SetLayerRecursive(newMesh, LayerMask.NameToLayer($"{XrLayers.XrAssetPrefab}"));
             newMesh.name = xrAssetData.Name;
+
+            // FOR DEBUG
+            // Debug.Log($"newMesh.name = {newMesh.name}");
 
             // set up prefab for drag-drop
             var prefab = newMesh.AddComponent<XrAssetPrefab>();
