@@ -155,7 +155,7 @@ namespace Sturfee.DigitalTwin.CMS
                             MyLogger.LogError($"Asset could not be loaded (NOT FOUND): {asset.Name}");
 
                             var dummyPrefab = new GameObject(asset.Name);
-                            LayerUtils.SetLayerRecursive(dummyPrefab, LayerMask.NameToLayer($"{XrLayers.XrAssetPrefab}"));
+                            LayerUtils.SetLayerRecursive(dummyPrefab, LayerMask.NameToLayer($"{XrLayers.XrPrefabs}"));
 
                             asset.Status = XrAssetStatus.Error;
                             asset.StatusMessage = $"Asset data missing. Please re-import.";
@@ -223,7 +223,7 @@ namespace Sturfee.DigitalTwin.CMS
                         {
                             var newProjectAsset = Instantiate(templateOption.Prefab);
 
-                            LayerUtils.SetLayerRecursive(newProjectAsset, LayerMask.NameToLayer($"{XrLayers.XrAssetPrefab}"));
+                            LayerUtils.SetLayerRecursive(newProjectAsset, LayerMask.NameToLayer($"{XrLayers.XrPrefabs}"));
                             newProjectAsset.name = asset.Name;
 
                             // set up prefab for drag-drop
@@ -565,7 +565,7 @@ namespace Sturfee.DigitalTwin.CMS
             rtData.Name = Path.GetFileNameWithoutExtension(instance.name);
             rtData.Url = xrAssetData.DataUrl;
 
-            LayerUtils.SetLayerRecursive(instance, LayerMask.NameToLayer($"{XrLayers.XrAssetPrefab}"));
+            LayerUtils.SetLayerRecursive(instance, LayerMask.NameToLayer($"{XrLayers.XrPrefabs}"));
             instance.name = xrAssetData.Name;
 
             // set up prefab for drag-drop
@@ -627,7 +627,7 @@ namespace Sturfee.DigitalTwin.CMS
             var newMesh = new GameObject(result.name);
             result.transform.parent = newMesh.transform;
 
-            LayerUtils.SetLayerRecursive(newMesh, LayerMask.NameToLayer($"{XrLayers.XrAssetPrefab}"));
+            LayerUtils.SetLayerRecursive(newMesh, LayerMask.NameToLayer($"{XrLayers.XrPrefabs}"));
             newMesh.name = xrAssetData.Name;
 
             // FOR DEBUG
