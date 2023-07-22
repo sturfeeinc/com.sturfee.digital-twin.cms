@@ -6,7 +6,7 @@
         "Sturfee-XRCS",
         "Sturfee-XRCS-Models",
         "Sturfee-XRCS-Config",
-        "UnityGLTFScripts",
+        "glTFast",
         "Sturfee.DigitalTwin.Logger",
         "Sturfee.DigitalTwin.Config",
         "SturfeeVPS.SDK",

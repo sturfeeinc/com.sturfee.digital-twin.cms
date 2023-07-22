@@ -12,8 +12,9 @@ using System.Linq;
 using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
 using UnityEngine;
-using UnityGLTF;
-using UnityGLTF.Loader;
+//using UnityGLTF;
+//using UnityGLTF.Loader;
+using GLTFast;
 
 namespace Sturfee.DigitalTwin.CMS
 {
@@ -588,11 +589,11 @@ namespace Sturfee.DigitalTwin.CMS
 
         private async Task LoadMeshAsync(string filePath, string meshType, XrProjectAssetData xrAssetData)
         {
-            var _importOptions = new ImportOptions
-            {
-                DataLoader = new FileLoader(Path.GetDirectoryName(filePath)),
-                AsyncCoroutineHelper = gameObject.AddComponent<AsyncCoroutineHelper>(),
-            };
+            //var _importOptions = new ImportOptions
+            //{
+            //    DataLoader = new FileLoader(Path.GetDirectoryName(filePath)),
+            //    AsyncCoroutineHelper = gameObject.AddComponent<AsyncCoroutineHelper>(),
+            //};
 
             MyLogger.Log($"ProjectLoader :: Khronos => Loading file = {filePath}");
 
@@ -601,12 +602,31 @@ namespace Sturfee.DigitalTwin.CMS
                 var filename = Path.GetFileNameWithoutExtension(filePath);
                 var obj = new GameObject($"{xrAssetData.Name}");
 
-                var importer = new GLTFSceneImporter(filePath, _importOptions);
+                //var importer = new GLTFSceneImporter(filePath, _importOptions);
+                //importer.Collider = GLTFSceneImporter.ColliderType.Mesh;
+                //importer.SceneParent = obj.transform;
+                //await importer.LoadSceneAsync(-1, true, (go, err) => { OnFinishAsync(filePath, xrAssetData, go, err); });
 
-                importer.Collider = GLTFSceneImporter.ColliderType.Mesh;
-                importer.SceneParent = obj.transform;
 
-                await importer.LoadSceneAsync(-1, true, (go, err) => { OnFinishAsync(filePath, xrAssetData, go, err); });
+                byte[] glbData = File.ReadAllBytes(filePath);
+                var gltf = new GltfImport();
+                bool success = await gltf.LoadGltfBinary(
+                    glbData,
+                    // The URI of the original data is important for resolving relative URIs within the glTF
+                    new Uri(filePath)
+                    );
+                if (success)
+                {
+                    var go = new GameObject($"GLTF_SCENE");
+                    go.transform.SetParent(obj.transform);
+                    success = await gltf.InstantiateMainSceneAsync(go.transform);
+                    OnFinishAsync(filePath, xrAssetData, go, null);
+                }
+                else
+                {
+                    MyLogger.Log($"ProjectLoader :: ERROR loading GLTF file");
+                }
+
             }
             catch (Exception ex)
             {
