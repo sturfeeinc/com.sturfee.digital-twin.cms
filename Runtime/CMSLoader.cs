@@ -620,6 +620,10 @@ namespace Sturfee.DigitalTwin.CMS
                     var go = new GameObject($"GLTF_SCENE");
                     go.transform.SetParent(obj.transform);
                     success = await gltf.InstantiateMainSceneAsync(go.transform);
+                    foreach (MeshFilter mf in go.GetComponentsInChildren<MeshFilter>())
+                    {
+                        mf.gameObject.AddComponent<MeshCollider>();
+                    }
                     OnFinishAsync(filePath, xrAssetData, go, null);
                 }
                 else
